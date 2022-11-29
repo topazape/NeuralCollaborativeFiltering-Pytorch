@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://download.pytorch.org/whl/cu117"
+verify_ssl = false
+name = "pytorch"
+
+[packages]
+pandas = "*"
+tqdm = "*"
+tomli = "*"
+torch = "*"
+torcheval = "*"
+
+[dev-packages]
+black = "*"
+debugpy = "*"
+flake8 = "*"
+ipython = "*"
+isort = "*"
+mypy = "*"
+pynvim = "*"
+pysen = "*"
+torchinfo = "*"
+
+[requires]
+python_version = "3.10"

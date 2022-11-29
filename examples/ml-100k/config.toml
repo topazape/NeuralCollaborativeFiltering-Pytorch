@@ -1,0 +1,11 @@
+[dataset]
+filename = "./dataset/ml-100k/u.data"
+sep = "\t"
+num_negatives = 4
+
+[model]
+[[model.gmf]]
+latent_dim = 8
+[[model.mlp]]
+latent_dim = 8
+layer_nums_list = [16, 32, 16, 8]
