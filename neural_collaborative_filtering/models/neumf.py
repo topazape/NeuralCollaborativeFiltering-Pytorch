@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+
 from .base_gmf import BaseGeneralizedMatrixFactorization
 from .base_mlp import BaseMultiLayerPerceptron
 

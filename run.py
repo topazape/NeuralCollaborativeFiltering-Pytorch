@@ -4,8 +4,8 @@ from pathlib import Path
 
 import torch
 from neural_collaborative_filtering import NeuMF, Trainer
-from neural_collaborative_filtering.utils import get_device
 from neural_collaborative_filtering.data import MFDatasetWithNegativeSampling
+from neural_collaborative_filtering.utils import get_device
 from torch.utils.data import DataLoader, Dataset, random_split
 
 try:
@@ -63,4 +63,9 @@ if __name__ == "__main__":
 
     tr_set, va_set, test_set, org_set = create_dataset(config)
 
-    model = NeuMF(user_num=org_set.user_num, item_num=org_set.user_num, gmf_dim=config["model"]["gmf"]["latent_dim"], mlp_dim=config["model"]["gmf"]["latent_dim"])
+    model = NeuMF(
+        user_num=org_set.user_num,
+        item_num=org_set.user_num,
+        gmf_dim=config["model"]["gmf"]["latent_dim"],
+        mlp_dim=config["model"]["gmf"]["latent_dim"],
+    )
