@@ -5,7 +5,10 @@ import torch
 import torch.nn as nn
 from neural_collaborative_filtering.utils import AverageMeter, get_logger
 from torch.utils.data import DataLoader
+from torcheval.metrics.functional import hit_rate
 from tqdm import tqdm
+
+from .metrics import dcg2
 
 
 class Trainer:
@@ -16,7 +19,6 @@ class Trainer:
         valid_loader: DataLoader,
         criterion: Any,
         optimizer: Any,
-        metric_fn: Any,
         device: str,
         save_dir: str,
     ) -> None:
@@ -24,7 +26,6 @@ class Trainer:
         self.train_loader, self.valid_loader = train_loader, valid_loader
         self.criterion = criterion
         self.optimizer = optimizer
-        self.metric_fn = metric_fn
         self.device = device
         self.save_dir = save_dir
 
@@ -35,7 +36,6 @@ class Trainer:
         for epoch in range(self.epochs):
             model.train()
             losses = AverageMeter("train_loss")
-            metrics = AverageMeter("train_metric")
 
             with tqdm(self.train_loader, dynamic_ncols=True) as pbar:
                 pbar.set_description(f"[Epoch {epoch + 1}/{self.epochs}")
@@ -45,41 +45,44 @@ class Trainer:
                     item_idxs = tr_data[1].to(self.device)
 
                     self.optimizer.zero_grad()
-                    inners = model(user_idxs, item_idxs)
-                    scores = tr_data[2].float().to(self.device)
+                    out = model(user_idxs, item_idxs)
+                    target = tr_data[2].float().to(self.device)
 
-                    loss = self.criterion(inners, scores)
+                    loss = self.criterion(out, target)
                     loss.backward()
                     self.optimizer.step()
 
                     losses.update(value=loss.item())
-                    metrics.update(value=self.metric_fn(inners, scores))
+
                     pbar.set_postfix({"loss": losses.value})
 
-            self.logger.info(
-                f"(train) epoch: {epoch} loss: {losses.avg} rmse: {metrics.avg}"
-            )
+            self.logger.info(f"(train) epoch: {epoch} loss: {losses.avg}")
             self.evaluate(model, epoch=epoch)
 
     @torch.no_grad()
     def evaluate(self, model: nn.Module, epoch: Optional[int] = None):
         model.eval()
         losses = AverageMeter("valid_loss")
-        metrics = AverageMeter("valid_rmse")
+        hrs = AverageMeter("valid_HR@10")
+        dcg2s = AverageMeter("valid_NDCG@10")
 
         for va_data in tqdm(self.valid_loader):
             user_idxs = va_data[0].to(self.device)
             item_idxs = va_data[1].to(self.device)
 
-            inners = model(user_idxs, item_idxs)
-            scores = va_data[2].float().to(self.device)
+            input = model(user_idxs, item_idxs)
+            target = va_data[2].float().to(self.device)
 
-            loss = self.criterion(inners, scores)
+            loss = self.criterion(input, target)
             losses.update(value=loss.item())
-            metrics.update(value=self.metric_fn(inners, scores))
+
+            gt_item = item_idxs[0].reshape(1)
+            hitrate_at_10 = hit_rate(input.reshape(1, -1), gt_item, k=10)
+            hrs.update(value=hitrate_at_10.item())
+            dcg2s.update(value=dcg2(input, gt_item, k=10).item())
 
         self.logger.info(
-            f"(vaid) epoch: {epoch} loss: {losses.avg} rmse: {metrics.avg}"
+            f"(vaid) epoch: {epoch} loss: {losses.avg} {hrs.name}: {hrs.avg} {dcg2s.name}: {dcg2s.avg}"
         )
 
         if epoch is not None:

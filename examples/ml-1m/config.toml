@@ -1,0 +1,20 @@
+[dataset]
+filename = "./dataset/ml-1m/ratings.dat"
+sep = "::"
+num_negatives = 4
+engine = "python"
+
+[dataloader.train]
+batch_size = 1024
+shuffle = true
+
+[model.gmf]
+latent_dim = 32
+[model.mlp]
+latent_dim = 32
+layer_nums_list = [64, 32, 16, 8]
+
+[trainer]
+epochs = 100
+learning_rate = 0.001
+pretrain = false

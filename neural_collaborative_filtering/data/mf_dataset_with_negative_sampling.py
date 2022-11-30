@@ -22,42 +22,52 @@ class MFDatasetWithNegativeSampling(BaseMFDataset):
 
         if isinstance(num_negatives, int):
             if num_negatives > 0:
-                self._create_data_with_negatives(num_negatives)
+                self.num_negatives = num_negatives
+                self._create_data_with_negatives()
             else:
                 raise ValueError
         else:
             raise TypeError
 
-    def _create_data_with_negatives(self, num_negatives: int) -> None:
+    def _create_data_with_negatives(self) -> None:
         all_items = np.array(list(self.item_indices.values()))
 
         negatives = (
             self.data.groupby("user_index")["item_index"].apply(np.unique).reset_index()
         )
         negatives["negative_items"] = negatives["item_index"].apply(
-            lambda x: np.setdiff1d(all_items, x)
-        )
-        negatives["negative_samples"] = negatives["negative_items"].apply(
-            lambda x: np.random.choice(x, num_negatives)
+            lambda x: np.random.choice(np.setdiff1d(all_items, x), 99)
         )
         negatives = negatives.drop(["item_index"], axis=1)
 
         self.data = self.data.merge(negatives, on="user_index")
 
-    def train_test_split(self) -> tuple["CreateDataset", "CreateDataset"]:
+    def train_test_split(
+        self,
+    ) -> tuple["CreateDataset", "CreateDataset", "CreateDataset"]:
         self.data["rank"] = self.data.groupby("user_index")["ts"].rank(
             method="first", ascending=False
         )
-        train = self.data[self.data["rank"] > 1].copy()
+        train = self.data[self.data["rank"] > 2].copy()
+        train["negative_samples"] = train["negative_items"].apply(
+            lambda x: np.random.choice(x, self.num_negatives)
+        )
+        valid = self.data[self.data["rank"] == 2].copy()
+        valid = valid.rename(columns={"negative_items": "negative_samples"})
         test = self.data[self.data["rank"] == 1].copy()
+        test = test.rename(columns={"negative_items": "negative_samples"})
 
         train = self.__explode_negative_items(train)
+        valid = self.__explode_negative_items(valid)
+        valid = valid.sort_values(by=["user_index", "score"], ascending=[True, False])
         test = self.__explode_negative_items(test)
+        test = test.sort_values(by=["user_index", "score"], ascending=[True, False])
 
         train_dataset = CreateDataset(train)
+        valid_dataset = CreateDataset(valid)
         test_dataset = CreateDataset(test)
 
-        return (train_dataset, test_dataset)
+        return (train_dataset, valid_dataset, test_dataset)
 
     def __explode_negative_items(self, df: pd.DataFrame) -> pd.DataFrame:
         pos = df[["user_index", "item_index", "rank", "score"]]
