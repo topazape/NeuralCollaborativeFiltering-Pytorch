@@ -19,5 +19,4 @@ options:
 # Example
 ```
 python run.py examples/ml-1m/config.toml
-
 ```
