@@ -128,6 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-/dataset
+/dataset/*
+!/dataset/ml-1m
+/dataset/ml-1m/*
 !/dataset/ml-1m/README
+!/dataset/ml-100k
+/dataset/ml-100k/*
 !/dataset/ml-100k/README
