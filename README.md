@@ -1,7 +1,8 @@
 # Neural Collaborative Filtering (NeuMF)
 
 Implementation of Neural Collaborative Filtering (NeuMF) in Pytorch. NeuMF is presented in the paper, [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031).
-<div>![](assets/NeuMF.png)</div>
+
+![](assets/NeuMF.png)
 
 # Usage
 ```
