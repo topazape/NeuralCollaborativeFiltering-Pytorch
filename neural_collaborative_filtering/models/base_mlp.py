@@ -28,8 +28,12 @@ class BaseMultiLayerPerceptron(nn.Module):
         self.fc_layers = nn.Sequential(*layers)
 
     def _init_weight(self) -> None:
-        nn.init.uniform_(self.user_emb.weight.data, a=0.0, b=1.0)
-        nn.init.uniform_(self.item_emb.weight.data, a=0.0, b=1.0)
+        self.user_emb.weight.data.normal_(mean=0, std=0.01)
+        self.item_emb.weight.data.normal_(mean=0, std=0.01)
+
+        for m in self.fc_layers:
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
 
     def forward(self) -> torch.Tensor:
         raise NotImplementedError

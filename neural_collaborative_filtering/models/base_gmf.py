@@ -10,8 +10,8 @@ class BaseGeneralizedMatrixFactorization(nn.Module):
         self.item_emb = nn.Embedding(num_embeddings=item_num, embedding_dim=dim)
 
     def _init_weight(self) -> None:
-        nn.init.uniform_(self.user_emb.weight.data, a=0.0, b=1.0)
-        nn.init.uniform_(self.item_emb.weight.data, a=0.0, b=1.0)
+        self.user_emb.weight.data.normal_(mean=0, std=0.01)
+        self.item_emb.weight.data.normal_(mean=0, std=0.01)
 
     def forward(self) -> torch.Tensor:
         raise NotImplementedError

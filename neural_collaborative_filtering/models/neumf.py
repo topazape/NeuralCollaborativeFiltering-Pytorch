@@ -29,6 +29,7 @@ class MultiLayerPerceptron(BaseMultiLayerPerceptron):
             dim=dim,
             layer_nums_list=layer_nums_list,
         )
+        self._init_weight()
 
     def forward(self, users: torch.Tensor, items: torch.Tensor) -> torch.Tensor:
         user_emb = self.user_emb(users)
