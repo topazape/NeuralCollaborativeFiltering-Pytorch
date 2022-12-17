@@ -5,7 +5,7 @@ num_negatives = 4
 engine = "python"
 
 [dataloader.train]
-batch_size = 1024
+batch_size = 256
 shuffle = true
 
 [model.gmf]
@@ -15,6 +15,6 @@ latent_dim = 32
 layer_nums_list = [64, 32, 16, 8]
 
 [trainer]
-epochs = 100
+epochs = 20
 learning_rate = 0.001
 pretrain = false

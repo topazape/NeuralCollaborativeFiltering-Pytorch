@@ -2,21 +2,19 @@
 filename = "./dataset/ml-100k/u.data"
 sep = "\t"
 num_negatives = 4
+engine = "c"
 
 [dataloader.train]
-batch_size = 1024
+batch_size = 256
 shuffle = true
-[dataloader.valid]
-batch_size = 1024
-shuffle = false
 
 [model.gmf]
-latent_dim = 8
+latent_dim = 32
 [model.mlp]
-latent_dim = 8
-layer_nums_list = [16, 32, 16, 8]
+latent_dim = 32
+layer_nums_list = [64, 32, 16, 8]
 
 [trainer]
-epochs = 200
-weight_decay = 0.01
-pretran = false
+epochs = 20
+learning_rate = 0.001
+pretrain = false

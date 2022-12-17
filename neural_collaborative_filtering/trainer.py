@@ -5,10 +5,9 @@ import torch
 import torch.nn as nn
 from neural_collaborative_filtering.utils import AverageMeter, get_logger
 from torch.utils.data import DataLoader
-from torcheval.metrics.functional import hit_rate
 from tqdm import tqdm
 
-from .metrics import dcg2
+from .metrics import hit_rate, dcg2
 
 
 class Trainer:
@@ -77,7 +76,7 @@ class Trainer:
             losses.update(value=loss.item())
 
             gt_item = item_idxs[0].reshape(1)
-            hitrate_at_10 = hit_rate(input.reshape(1, -1), gt_item, k=10)
+            hitrate_at_10 = hit_rate(input, gt_item, k=10)
             hrs.update(value=hitrate_at_10.item())
             dcg2s.update(value=dcg2(input, gt_item, k=10).item())
 
